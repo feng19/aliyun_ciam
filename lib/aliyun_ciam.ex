@@ -20,6 +20,23 @@ defmodule Aliyun.CIAM do
   end
 
   @doc """
+  获取 Token(授权码模式)
+  """
+  def get_token_by_code(config, code, redirect_uri, scope \\ "USER_API") do
+    Requester.post(
+      "#{config.endpoint}/api/bff/v1.2/developer/ciam/oauth/token",
+      json_map(
+        client_id: config.client_id,
+        client_secret: config.client_secret,
+        grant_type: "authorization_code",
+        scope: scope,
+        code: code,
+        redirect_uri: redirect_uri
+      )
+    )
+  end
+
+  @doc """
   令牌有效性检验
   """
   def check_token(config) do

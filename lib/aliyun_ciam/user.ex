@@ -32,6 +32,27 @@ defmodule Aliyun.CIAM.User do
     }
   end
 
+  def oauth2_authorize_url(
+        login_endpoint,
+        client_id,
+        redirect_uri,
+        scope \\ "USER_API",
+        state \\ ""
+      ) do
+    [
+      [login_endpoint, "?", "client_id=", client_id],
+      ["&redirect_uri=", URI.encode_www_form(redirect_uri)],
+      "&response_type=code",
+      ["&scope=", scope],
+      if match?("", state) do
+        []
+      else
+        ["&state=", state]
+      end
+    ]
+    |> IO.iodata_to_binary()
+  end
+
   @doc """
   令牌有效性检验
   """
