@@ -4,6 +4,13 @@ defmodule Aliyun.CIAM.Login do
   alias Aliyun.CIAM.Requester
 
   @doc """
+  SSO 登录
+  """
+  def sso_url(config) do
+    "#{config.login_endpoint}/api/bff/v1.2/developer/ciam/sp/sso?idaasAppId=#{config.appid}"
+  end
+
+  @doc """
   账密登录
   """
   def login_by_pwd(config, username, password) do
@@ -24,7 +31,7 @@ defmodule Aliyun.CIAM.Login do
   @doc """
   验证码登录 - 发送验证码
   """
-  def obtain_code_to_phone(config, phone_region, phone_no) do
+  def obtain_code_to_phone(config, phone_region \\ "86", phone_no) do
     obtain_code(config, json_map(type: "SMS", phoneRegion: phone_region, phoneNumber: phone_no))
   end
 
@@ -49,7 +56,7 @@ defmodule Aliyun.CIAM.Login do
   @doc """
   验证码登录 - 校验验证码 - by phone
   """
-  def verify_code(config, fid, phone_region, phone_no, code) do
+  def verify_code_by_phone(config, fid, phone_region \\ "86", phone_no, code) do
     verify_code(
       config,
       json_map(
@@ -65,7 +72,7 @@ defmodule Aliyun.CIAM.Login do
   @doc """
   验证码登录 - 校验验证码 - by email
   """
-  def verify_code(config, fid, email, code) do
+  def verify_code_by_email(config, fid, email, code) do
     verify_code(
       config,
       json_map(fId: fid, type: "EMAIL", phoneRegion: email, code: code)

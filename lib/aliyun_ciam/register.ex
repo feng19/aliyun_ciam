@@ -6,7 +6,7 @@ defmodule Aliyun.CIAM.Register do
   @doc """
   发送验证码 - to phone NO
   """
-  def obtain_code_to_phone(config, phone_region, phone_no) do
+  def obtain_code_to_phone(config, phone_region \\ "86", phone_no) do
     obtain_code(config, json_map(type: "SMS", phoneRegion: phone_region, phoneNumber: phone_no))
   end
 
@@ -31,7 +31,7 @@ defmodule Aliyun.CIAM.Register do
   @doc """
   验证验证码 - by phone NO
   """
-  def verify_code(config, fid, phone_region, phone_no, code) do
+  def verify_code_by_phone(config, fid, phone_region \\ "86", phone_no, code) do
     verify_code(
       config,
       json_map(
@@ -45,12 +45,39 @@ defmodule Aliyun.CIAM.Register do
   end
 
   @doc """
+  验证验证码 - by phone NO & password
+  """
+  def verify_code_by_phone(config, fid, phone_region, phone_no, password, code) do
+    verify_code(
+      config,
+      json_map(
+        fId: fid,
+        type: "SMS",
+        phoneRegion: phone_region,
+        phoneNumber: phone_no,
+        password: password,
+        code: code
+      )
+    )
+  end
+
+  @doc """
   验证验证码 - by email
   """
-  def verify_code(config, fid, email, code) do
+  def verify_code_by_email(config, fid, email, code) do
     verify_code(
       config,
       json_map(fId: fid, type: "EMAIL", phoneRegion: email, code: code)
+    )
+  end
+
+  @doc """
+  验证验证码 - by email & password
+  """
+  def verify_code_by_email(config, fid, email, password, code) do
+    verify_code(
+      config,
+      json_map(fId: fid, type: "EMAIL", phoneRegion: email, password: password, code: code)
     )
   end
 

@@ -50,7 +50,7 @@ defmodule Aliyun.CIAM.Refresher do
         } = data
 
         Logger.info(
-          "get token successes, token_type: #{token_type}, scope: #{scope}, expires_in: #{expires_in}"
+          "got token successes, token_type: #{token_type}, scope: #{scope}, expires_in: #{expires_in}"
         )
 
         expires = now_unix() + expires_in
@@ -66,11 +66,21 @@ defmodule Aliyun.CIAM.Refresher do
         })
 
       error ->
-        Logger.warn("get token failed: #{inspect(error)}")
-        config
+        Logger.warn("got token failed: #{inspect(error)}, will try again after one minute.")
+        timer = start_refresh_token_timer(60, name)
+        Map.merge(config, %{timer: timer})
     end
     |> tap(fn config ->
-      cache_config = Map.take(config, [:endpoint, :client_id, :client_secret, :access_token])
+      cache_config =
+        Map.take(config, [
+          :appid,
+          :login_endpoint,
+          :endpoint,
+          :client_id,
+          :client_secret,
+          :access_token
+        ])
+
       :ets.insert(@table, {name, cache_config})
     end)
   end
