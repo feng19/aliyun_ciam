@@ -3,6 +3,15 @@ defmodule Aliyun.CIAM.User do
   import Jason.Helpers
   alias Aliyun.CIAM.Requester
 
+  @doc """
+  初始化用户配置
+
+  ## Example
+
+      config = Aliyun.CIAM.get_config("app_name")
+      {:ok, %{body: %{"success" => true, "data" => data}}} = Aliyun.CIAM.Login.login_by_pwd(config, "username", "password")
+      user_config = #{inspect(__MODULE__)}.init_user_config(config, data)
+  """
   def init_user_config(
         config,
         %{
@@ -22,6 +31,33 @@ defmodule Aliyun.CIAM.User do
       endpoint: config.endpoint,
       user_id: user_id,
       uuid: uuid,
+      access_token: access_token,
+      refresh_token: refresh_token,
+      expires_in: expires_in,
+      expires: expires,
+      id_token: id_token,
+      scope: scope,
+      token_type: token_type
+    }
+  end
+
+  def init_user_config(
+        config,
+        %{
+          "access_token" => access_token,
+          "expires_in" => expires_in,
+          "id_token" => id_token,
+          "refresh_token" => refresh_token,
+          "scope" => scope,
+          "token_type" => token_type
+        } = _data
+      ) do
+    expires = System.system_time(:second) + expires_in
+
+    %{
+      endpoint: config.endpoint,
+      user_id: nil,
+      uuid: nil,
       access_token: access_token,
       refresh_token: refresh_token,
       expires_in: expires_in,
@@ -79,6 +115,10 @@ defmodule Aliyun.CIAM.User do
 
   @doc """
   获取个人信息
+
+  ## Example
+
+      #{inspect(__MODULE__)}.user_info(user_config)
   """
   def user_info(config) do
     Requester.get(
@@ -125,6 +165,28 @@ defmodule Aliyun.CIAM.User do
     Requester.post(
       "#{config.endpoint}/api/bff/v1.2/developer/ciam/user/agree_records/recall",
       json_map(uuid: uuid),
+      query: [access_token: config.access_token]
+    )
+  end
+
+  @doc """
+  组件内 SSO
+
+  ## Example
+
+      #{inspect(__MODULE__)}.component_sso(user_config, "appid", "redirect_uri", "state")
+  """
+  def component_sso(config, appid, redirect_uri, state, forward \\ "") do
+    Requester.post(
+      "#{config.endpoint}/api/bff/v1.2/developer/ciam/authorized/sso",
+      json_map(
+        idaasAppId: appid,
+        responseType: "code",
+        userType: "default",
+        redirectUrl: redirect_uri,
+        state: state,
+        forward: forward
+      ),
       query: [access_token: config.access_token]
     )
   end

@@ -11,6 +11,12 @@ defmodule Aliyun.CIAM.Refresher do
     end
   end
 
+  def get_appid(name) do
+    with %{appid: appid} <- get_config(name) do
+      appid
+    end
+  end
+
   def start_link(settings) when is_list(settings) do
     GenServer.start_link(__MODULE__, settings, name: __MODULE__)
   end
@@ -18,8 +24,8 @@ defmodule Aliyun.CIAM.Refresher do
   @impl true
   def init(settings) do
     state =
-      Enum.map(settings, fn {name, config} ->
-        refresh_token(config, name)
+      Map.new(settings, fn {name, config} ->
+        {name, refresh_token(config, name)}
       end)
 
     {:ok, state}

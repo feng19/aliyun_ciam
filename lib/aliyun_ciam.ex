@@ -5,6 +5,9 @@ defmodule Aliyun.CIAM do
   import Jason.Helpers
   alias Aliyun.CIAM.Requester
 
+  defdelegate get_config(name), to: Aliyun.CIAM.Refresher
+  defdelegate get_appid(name), to: Aliyun.CIAM.Refresher
+
   @doc """
   获取 Token(客户端授权模式)
   """
@@ -94,5 +97,14 @@ defmodule Aliyun.CIAM do
       "#{config.endpoint}/api/bff/v1.2/developer/ciam/captcha",
       query: [access_token: config.access_token]
     )
+  end
+
+  def decode_id_token(id_token) do
+    # jwt: "header.payload.signature"
+    id_token
+    |> String.split(".")
+    |> Enum.at(1)
+    |> Base.url_decode64!(padding: false)
+    |> Jason.decode()
   end
 end
